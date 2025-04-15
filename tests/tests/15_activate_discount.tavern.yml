@@ -1,0 +1,365 @@
+test_name: "Активация программы лояльности (до оплаты на POS-терминале)"
+
+includes:
+  - !include encoded_images.yaml
+
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_1_jwt: jwt
+          company_1_uuid: company_id
+
+  - name: 3 - Запрос на регистрацию клиента №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+
+  - name: 4 - Запрос на авторизацию клиента №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        client_id: !anything
+        jwt: !anything
+      save:
+        json:
+          client_1_jwt: jwt
+          client_1_id: client_id
+
+  - name: 5 - Запрос на создание программы лояльности accumulative
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 2
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 2
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+      save:
+        json:
+          accumulative_loyal_id: loyal_id
+
+  - name: 6 - Запрос на создание программы лояльности permanent
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 20%"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+      save:
+        json:
+          permanent_loyal_id: loyal_id
+
+  - name: 7 - Запрос на попытку получения скидки по программе лояльности accumulative
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 422  # Не выполнены условия
+
+  - name: 8 - Запрос на попытку активации программы лояльности accumulative
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 422  # Не выполнены условия
+
+  - name: 9 - Запрос получение скидки по программе лояльности permanent
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{permanent_loyal_id}"
+        goods:
+          - id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+            cost: 100
+    response:
+      status_code: 200
+      json:
+        discount_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        discount_percent: 0.2
+
+  - name: 10 - Запрос на активацию программы лояльности permanent
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{permanent_loyal_id}"
+        goods:
+          - id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+            cost: 100
+    response:
+      status_code: 200
+      json:
+        discount_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        discount_percent: 0.2
+
+  - name: 11 - Запрос на активацию программы лояльности permanent
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{permanent_loyal_id}"
+        goods:
+          - id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+            cost: 100
+    response:
+      status_code: 422  # Нельзя применить сюда
+
+  - name: 12 - Запрос на регистрацию покупок №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/{client_1_jwt}"
+        goods:
+          - id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"  # Целевой товар для accumulative
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 201
+      json:
+        message: "added"
+
+  - name: 13 - Запрос на попытку активации программы лояльности accumulative №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 422  # Ещё не выполнены условия
+
+  - name: 14 - Запрос на регистрацию покупок №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/{client_1_jwt}"
+        goods:
+          - id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"  # Целевой товар для accumulative
+            cost: 100
+    response:
+      status_code: 201
+      json:
+        message: "added"
+
+  - name: 15 - Запрос на попытку активации программы лояльности accumulative №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+            cost: 100
+    response:
+      status_code: 422  # Условия выполнены, но сюда применить нельзя
+
+  - name: 16 - Запрос на активацию программы лояльности accumulative №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+            cost: 100
+    response:
+      status_code: 200  # Выполнены все условия
+      json:
+        discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        discount_percent: 0.15
+
+  - name: 17 - Запрос на получение программы лояльности accumulative №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+            cost: 100
+    response:
+      status_code: 422  # Выполненные ранее условия сбросились после активации
+
+  - name: 18 - Запрос на попытку активации программы лояльности accumulative №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/discount"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "loyal/{client_1_jwt}/{accumulative_loyal_id}"
+        goods:
+          - id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+            cost: 100
+    response:
+      status_code: 422  # Выполненные ранее условия сбросились после активации

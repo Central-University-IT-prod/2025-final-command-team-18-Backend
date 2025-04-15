@@ -1,0 +1,416 @@
+test_name: "Редактирование программы лояльности"
+
+includes:
+  - !include encoded_images.yaml
+
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_1_jwt: jwt
+
+  - name: 3 - Запрос на создание программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1972396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1972396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+      save:
+        json:
+          loyalty_1_id: loyal_id
+
+  - name: 4 - Запрос на редактирование программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        unique_activations: 200
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1972396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 5 - Запрос на получение изменённой программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1972396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 6 - Запрос на редактирование программы лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        total_activations: 1000
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 1000
+        start_date: 1972396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 7 - Запрос на получение изменённой программы лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 1000
+        start_date: 1972396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 8 - Запрос на редактирование программы лояльности №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        end_date: 17823106674
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 1000
+        start_date: 1972396674
+        end_date: 17823106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 9 - Запрос на получение изменённой программы лояльности №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 1000
+        start_date: 1972396674
+        end_date: 17823106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 10 - Запрос на редактирование программы лояльности №4
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        unique_activations: 800
+        end_date: 17923106674
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 800
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 1000
+        start_date: 1972396674
+        end_date: 17923106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 11 - Запрос на получение изменённой программы лояльности №4
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 800
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 1000
+        start_date: 1972396674
+        end_date: 17923106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 12 - Запрос на редактирование программы лояльности №5
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        unique_activations: 8000
+        total_activations: 10000
+        end_date: 17933106674
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 8000
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 10000
+        start_date: 1972396674
+        end_date: 17933106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 13 - Запрос на получение изменённой программы лояльности №5
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 8000
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 10000
+        start_date: 1972396674
+        end_date: 17933106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 14 - Запрос на редактирование программы лояльности с некорр. данными №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        unique_activations: 0
+    response:
+      status_code: 400
+
+  - name: 15 - Запрос на редактирование программы лояльности с некорр. данными №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        total_activations: 0
+    response:
+      status_code: 400
+
+  - name: 16 - Запрос на редактирование программы лояльности с некорр. данными №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        end_date: 100
+    response:
+      status_code: 400
+
+  - name: 17 - Запрос на редактирование программы лояльности с некорр. токеном
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_1_id}"
+      method: PATCH
+      headers:
+        Authorization: "Bearer REDACTED.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MDk1NTEyNiwianRpIjoiNzU5MDEwZTktYTQ0Ni00NmVjLTlkNDEtNWRkMzBlMTMzOTkwIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjQwYmUxNzZjLTA0MDAtNDMwMC1hYzg5LTVhZjNjZWYxOGM2MSIsIm5iZiI6MTc0MDk1NTEyNiwiY3NyZiI6Ijg3YzgyMmU1LTNlNGUtNDA5MC05NWY5LTJhNDJlNjYzYzI5NyIsImV4cCI6MTc0MzU0NzEyNiwidXNlcl9pZCI6IjQwYmUxNzZjLTA0MDAtNDMwMC1hYzg5LTVhZjNjZWYxOGM2MSIsImFjY2VzcyI6InVzZXIifQ.rqmi3w5AyvX2C63G1N3YnKLOLQkU6GRCAwhUBVQ1vcM"
+      json:
+        total_activations: 90000
+    response:
+      status_code: 403

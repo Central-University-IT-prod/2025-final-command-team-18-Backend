@@ -1,0 +1,121 @@
+test_name: "Регистрация компании"
+
+includes:
+  - !include encoded_images.yaml
+
+stages:
+  - name: 1 - Запрос на регистрацию компании
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на регистрацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Big Theater"
+        phone: "+79998889997"
+        email: "big_theater_afisha@company.gov"
+        vertical_banner: "{image_2}"
+        password: "AStroingP@@ss!9"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Big Theater"
+        phone: "+79998889997"
+        email: "big_theater_afisha@company.gov"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 3 - Запрос на регистрацию с некорректным именем
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "B"
+        phone: "+71117894567"
+        email: "big_theater_afisha@company.gov"
+        vertical_banner: "{image_2}"
+        password: "AStroingP@@ss!9"
+    response:
+      status_code: 400
+
+  - name: 4 - Запрос на регистрацию с некорректным телефоном
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Big Theater"
+        phone: "+77894567"
+        email: "big_theater_afisha@company.gov"
+        vertical_banner: "{image_2}"
+        password: "AStroingP@@ss!9"
+    response:
+      status_code: 400
+
+  - name: 5 - Запрос на регистрацию с некорректной почтой
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Big Theater"
+        phone: "+79997894567"
+        email: "big_theater_afisha-company.gov"
+        vertical_banner: "{image_2}"
+        password: "AStroingP@@ss!9"
+    response:
+      status_code: 400
+
+  - name: 6 - Запрос на регистрацию компании c некорректной картинкой
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "My little Pony Co."
+        phone: "+71117894567"
+        email: "main_pony@mail.com"
+        vertical_banner: "{incorrect_image_1}"
+        password: "AStroingP@@ss!9"
+    response:
+      status_code: 400
+
+  - name: 7 - Запрос на регистрацию компании c некорректной картинкой (неправильный размер)
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "My little Pony Co."
+        phone: "+71117894567"
+        email: "main_pony@mail.com"
+        vertical_banner: "{incorrect_size_image_1}"
+        password: "AStroingP@@ss!9"
+    response:
+      status_code: 400
+
+  - name: 8 - Запрос на регистрацию компании c данными сущ. компании
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Fake Rubbers and Co."
+        phone: "+79991000000"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "AStroingP##ss!9"
+    response:
+      status_code: 409

@@ -1,0 +1,709 @@
+test_name: "Создание программы лояльности компании"
+
+includes:
+  - !include encoded_images.yaml
+
+# TODO: добавить тестов
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_1_jwt: jwt
+
+  - name: 3 - Запрос на создание программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 4 - Запрос на создание программы лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 20%"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+
+  - name: 5 - Запрос на создание программы лояльности без категорий
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 99% ограниченное время"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+
+  - name: 6 - Запрос на создание программы лояльности с некорректным изображением (большая картинка)
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{incorrect_size_image_1}"
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+    response:
+      status_code: 400
+
+  - name: 7 - Запрос на создание программы лояльности с несуществующим типом
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "not_exists_type"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+    response:
+      status_code: 400
+
+  - name: 8 - Запрос на создание программы лояльности с неправильным количеством №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 0
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 9 - Запрос на создание программы лояльности с неправильным количеством №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 0
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 10 - Запрос на создание программы лояльности с неправильным количеством №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: -84293
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 10 - Запрос на создание программы лояльности с неправильной датой начала
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1296674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 11 - Запрос на создание программы лояльности с неправильной датой конца
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 1772300004
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 12 - Запрос на создание программы лояльности с недостающими полями по типу accumulate №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 400
+
+  - name: 13 - Запрос на создание программы лояльности с недостающими полями по типу accumulate №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 400
+
+  - name: 14 - Запрос на создание программы лояльности с недостающими полями по типу accumulate №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 400
+
+  - name: 15 - Запрос на создание программы лояльности с недостающими полями по типу accumulate №4
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+    response:
+      status_code: 400
+
+  - name: 16 - Запрос на создание программы лояльности с недостающими полями при типе permanent №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 400
+
+  - name: 17 - Запрос на создание программы лояльности с недостающими полями при типе permanent №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+    response:
+      status_code: 400
+
+  - name: 18 - Запрос на создание программы лояльности с недостающими полями №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 18 - Запрос на создание программы лояльности с недостающими полями №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 400
+
+  - name: 19 - Запрос на создание программы лояльности с несущ. JWT
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer REDACTED.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.BMU1rwSQ_qc7yrDy1OcohKiWbG5HXMiXof6DJ_S0-As"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.1
+    response:
+      status_code: 401
+
+  - name: 19 - Запрос на создание программы лояльности с некорр. значениями полей при типе accumulate
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 1.1
+    response:
+      status_code: 400
+
+  - name: 20 - Запрос на создание программы лояльности с некорр. значениями полей при типе accumulate
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "accumulate"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 0
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.9
+    response:
+      status_code: 400
+
+  - name: 20 - Запрос на создание программы лояльности с некорр. значениями полей при типе permanent
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 9.1
+    response:
+      status_code: 400
+
+  - name: 21 - Запрос на регистрацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co. not fake"
+        phone: "+79881234567"
+        email: "robbers@gmail.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co. not fake"
+        phone: "+79881234567"
+        email: "robbers@gmail.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "robbers@gmail.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_2_jwt: jwt
+
+  - name: 3 - Запрос на создание программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_2_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+          - "Техника"
+          - "Лодки"
+          - "Моторы"
+          - "Конструкторы"
+          - "Яблоки"
+          - "Фрукты"
+          - "Магазины"
+          - "Ноутбуки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+          - "Техника"
+          - "Лодки"
+          - "Моторы"
+          - "Конструкторы"
+          - "Яблоки"
+          - "Фрукты"
+          - "Магазины"
+          - "Ноутбуки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 4 - Запрос на создание программы лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_2_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 20%"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2

@@ -1,0 +1,261 @@
+test_name: "Получение программы лояльности по id"
+
+includes:
+  - !include encoded_images.yaml
+
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_1_jwt: jwt
+
+  - name: 3 - Запрос на создание программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Бесплатная доставка"
+        banner: "{image_3}"  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Бытовая химия"
+          - "Автотовары"
+        total_activations: 400
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Бесплатная доставка на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Бесплатная доставка"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Бытовая химия"
+          - "Автотовары"
+        total_activations: 400
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Бесплатная доставка на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+      save:
+        json:
+          loyalty_program_1_id: loyal_id
+
+  - name: 5 - Запрос на создание программы лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Кэшбек на все товары"
+        banner: "{image_3}"  # TODO: Replace by link to image soon
+        type: "permanent"
+        unique_activations: 50
+        categories:
+          - "Товары для дома"
+          - "Гаджеты"
+        total_activations: 200
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Кэшбек на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Кэшбек на все товары"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "permanent"
+        unique_activations: 50
+        categories:
+          - "Товары для дома"
+          - "Гаджеты"
+        total_activations: 200
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Кэшбек на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+      save:
+        json:
+          loyalty_program_2_id: loyal_id
+
+  - name: 6 - Запрос на создание программы лояльности №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка на технику"
+        banner: "{image_3}"  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 300
+        categories:
+          - "Техника"
+          - "Одежда"
+        total_activations: 600
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка на технику при покупках на определённую сумму"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка на технику"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 300
+        categories:
+          - "Техника"
+          - "Одежда"
+        total_activations: 600
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка на технику при покупках на определённую сумму"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+      save:
+        json:
+          loyalty_program_3_id: loyal_id
+
+  - name: 7 - Запрос на получение информации о программе лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_program_1_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Бесплатная доставка"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 200
+        categories:
+          - "Бытовая химия"
+          - "Автотовары"
+        total_activations: 400
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Бесплатная доставка на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+
+  - name: 8 - Запрос на получение информации о программе лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_program_2_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Кэшбек на все товары"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "permanent"
+        unique_activations: 50
+        categories:
+          - "Товары для дома"
+          - "Гаджеты"
+        total_activations: 200
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Кэшбек на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+
+  - name: 9 - Запрос на получение информации о программе лояльности №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/{loyalty_program_2_id}"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 200
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Кэшбек на все товары"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "permanent"
+        unique_activations: 50
+        categories:
+          - "Товары для дома"
+          - "Гаджеты"
+        total_activations: 200
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Кэшбек на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+
+  - name: 10 - Запрос на получение информации о несущ. программе лояльности
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalty/b83cb26b-9103-4c5e-9484-493fc212c5c5"
+      method: GET
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+    response:
+      status_code: 404

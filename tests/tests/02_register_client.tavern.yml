@@ -1,0 +1,198 @@
+test_name: "Регистрация клиента"
+
+stages:
+  - name: 1 - Обычный запрос на регистрацию
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+
+  - name: 2 - Обычный запрос на регистрацию
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Василий"
+        surname: "Зайцев"
+        phone: "+79456351212"
+        email: "vasilek@yandex.com"
+        password: "Valid@2024Pass!"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Василий"
+        surname: "Зайцев"
+        phone: "+79456351212"
+        email: "vasilek@yandex.com"
+
+  - name: 3 - Обычный запрос на регистрацию без фамилии
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        phone: "+79999875467"
+        email: "ivan_fake@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Иван"
+        surname: null
+        phone: "+79999875467"
+        email: "ivan_fake@example.com"
+
+  - name: 4 - Запрос на регистрацию с некорректной почтой
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79999875467"
+        email: "ivan_fake@.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 400
+
+  - name: 5 - Запрос на регистрацию с некорректным номером телефона
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+715"
+        email: "ivan_fake@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 400
+
+  - name: 6 - Запрос на регистрацию с некорректным паролем
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 7 - Запрос на регистрацию с коротким именем
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "А"
+        surname: "Иванов"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 8 - Запрос на регистрацию с короткой фамилией
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "А"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 9 - Запрос на регистрацию с длинным именем
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "ИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИванИван"
+        surname: "Иванов"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 10 - Запрос на регистрацию с длинной фамилией
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "ИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИвановИванов"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 11 - Запрос на регистрацию с недостающими полями №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 12 - Запрос на регистрацию с недостающими полями №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        surname: "Иванов"
+        phone: "+79999999999"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 13 - Запрос на регистрацию с недостающими полями №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        email: "ivan_fake@example.com"
+        password: "strongpass987"
+    response:
+      status_code: 400
+
+  - name: 14 - Запрос на регистрацию с почтой сущ. клиента
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Андрей"
+        surname: "Петров"
+        phone: "+79991234000"
+        email: "ivan@example.com"
+        password: "Strong!P@ss111"
+    response:
+      status_code: 409

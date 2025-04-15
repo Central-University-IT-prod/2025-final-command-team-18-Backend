@@ -1,0 +1,129 @@
+test_name: "Авторизация компании"
+
+includes:
+  - !include encoded_images.yaml
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+
+  - name: 3 - Запрос на регистрацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "My Little Pony Co."
+        phone: "+79690016777"
+        email: "main_pony@pony.co"
+        vertical_banner: "{image_2}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "My Little Pony Co."
+        phone: "+79690016777"
+        email: "main_pony@pony.co"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 4 - Запрос на авторизацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "main_pony@pony.co"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+
+  - name: 5 - Повторный запрос на авторизацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "main_pony@pony.co"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+
+  - name: 6 - Запрос на авторизацию компании с неверным паролем
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "main_pony@pony.co"
+        password: "EasyPassword"
+    response:
+      status_code: 401
+
+  - name: 6 - Запрос на авторизацию компании с неверной почтой
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "incognita@pony.co"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 401
+
+  - name: 7 - Запрос на авторизацию компании с отсутствующими полями №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        password: "Strong!P@ss987"
+    response:
+      status_code: 400
+
+  - name: 8 - Запрос на авторизацию компании с отсутствующими полями №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "incognita@pony.co"
+    response:
+      status_code: 400
+
+  - name: 9 - Запрос на авторизацию компании с отсутствующими полями №3
+    request:
+      headers:
+        content-type: application/json
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+    response:
+      status_code: 400

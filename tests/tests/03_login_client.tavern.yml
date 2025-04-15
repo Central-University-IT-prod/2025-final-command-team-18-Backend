@@ -1,0 +1,117 @@
+test_name: "Авторизация клиента"
+
+stages:
+  - name: 1 - Запрос на регистрацию клиента №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+
+  - name: 2 - Запрос на авторизацию клиента №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        client_id: !anything
+        jwt: !anything
+
+  - name: 3 - Запрос на регистрацию клиента №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Мария"
+        surname: "Малинова"
+        phone: "+74952222222"
+        email: "maria_mary@gmail.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Мария"
+        surname: "Малинова"
+        phone: "+74952222222"
+        email: "maria_mary@gmail.com"
+
+  - name: 4 - Запрос на авторизацию клиента №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "maria_mary@gmail.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        client_id: !anything
+        jwt: !anything
+
+  - name: 5 - Запрос на повторную авторизацию клиента №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "maria_mary@gmail.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        client_id: !anything
+        jwt: !anything
+
+  - name: 6 - Запрос на авторизацию с неверным паролем
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "maria_mary@gmail.com"
+        password: "Easy!P@ss987"
+    response:
+      status_code: 401
+
+  - name: 7 - Запрос на авторизацию несуществующего пользователя
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "incognita@gmail.com"
+        password: "123456789"
+    response:
+      status_code: 401
+
+  - name: 8 - Запрос на авторизацию с недостающими полями №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        password: "123456789"
+    response:
+      status_code: 400
+
+  - name: 8 - Запрос на авторизацию с недостающими полями №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "maria_mary@gmail.com"
+    response:
+      status_code: 400

@@ -1,0 +1,283 @@
+test_name: "Получение списка компаний"
+
+includes:
+  - !include encoded_images.yaml
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на регистрацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Tech Innovators"
+        phone: "+79992345678"
+        email: "contact@techinnovators.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Tech Innovators"
+        phone: "+79992345678"
+        email: "contact@techinnovators.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 3 - Запрос на регистрацию компании №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Green Energy Ltd."
+        phone: "+79993456789"
+        email: "support@greenenergy.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Green Energy Ltd."
+        phone: "+79993456789"
+        email: "support@greenenergy.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 4 - Запрос на регистрацию компании №4
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "AutoParts Pro"
+        phone: "+79994567890"
+        email: "sales@autoparts.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "AutoParts Pro"
+        phone: "+79994567890"
+        email: "sales@autoparts.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 5 - Запрос на регистрацию компании №5
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Cloud Solutions"
+        phone: "+79995678901"
+        email: "info@cloudsolutions.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Cloud Solutions"
+        phone: "+79995678901"
+        email: "info@cloudsolutions.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 6 - Запрос на регистрацию компании №6
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Foodie Delights"
+        phone: "+79996789012"
+        email: "orders@foodiedelights.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Foodie Delights"
+        phone: "+79996789012"
+        email: "orders@foodiedelights.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 7 - Запрос на регистрацию компании №7
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "EduTech Global"
+        phone: "+79997890123"
+        email: "support@edutech.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "EduTech Global"
+        phone: "+79997890123"
+        email: "support@edutech.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 8 - Запрос на регистрацию компании №8
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Digital Artworks"
+        phone: "+79998901234"
+        email: "hello@digitalart.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Digital Artworks"
+        phone: "+79998901234"
+        email: "hello@digitalart.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 9 - Запрос на регистрацию компании №9
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Health & Wellness"
+        phone: "+79999012345"
+        email: "care@healthwellness.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Health & Wellness"
+        phone: "+79999012345"
+        email: "care@healthwellness.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 10 - Запрос на регистрацию компании №10
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Real Estate Experts"
+        phone: "+79990123456"
+        email: "sales@realestate.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Real Estate Experts"
+        phone: "+79990123456"
+        email: "sales@realestate.com"
+        image_url: !anything
+
+  - name: 11 - Запрос на регистрацию компании №11
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "FinTech Solutions"
+        phone: "+79991234568"
+        email: "contact@fintech.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "FinTech Solutions"
+        phone: "+79991234568"
+        email: "contact@fintech.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 12 - Запрос на получение списка компаний без пагинации
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/companies"
+      method: GET
+    response:
+      status_code: 200
+      strict:
+        - json:off
+      json:
+        - name: "Rubbers and Co."
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Tech Innovators"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Green Energy Ltd."
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "AutoParts Pro"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Cloud Solutions"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Foodie Delights"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "EduTech Global"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Digital Artworks"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Health & Wellness"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything
+
+        - name: "Real Estate Experts"
+          phone: !anything
+          company_id: !anything
+          image_url: !anything
+          email: !anything

@@ -1,0 +1,498 @@
+test_name: "Получение программ лояльности"
+
+includes:
+  - !include encoded_images.yaml
+
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+      save:
+        json:
+          company_1_id: company_id
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_1_jwt: jwt
+
+  - name: 3 - Запрос на создание программы лояльности №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+      save:
+        json:
+          company_1_loyalty_1_id: loyal_id
+
+  - name: 4 - Запрос на создание программы лояльности №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 20%"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+      save:
+        json:
+          company_1_loyalty_2_id: loyal_id
+
+  - name: 5 - Запрос на создание программы лояльности №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 99% ограниченное время"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+      save:
+        json:
+          company_1_loyalty_3_id: loyal_id
+
+  - name: 6 - Запрос на регистрацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co. fake"
+        phone: "+79991234567"
+        email: "rubbers@example.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co. fake"
+        phone: "+79991234567"
+        email: "rubbers@example.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+      save:
+        json:
+          company_2_id: company_id
+
+  - name: 7 - Запрос на авторизацию компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_2_jwt: jwt
+
+  - name: 8 - Запрос на создание программы лояльности №1 компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_2_jwt}"
+      json:
+        name: "Скидка 10%"
+        banner: "{image_3}"
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 10%"
+        banner: !anything  # TODO: Replace by link to image soon
+        type: "accumulative"
+        unique_activations: 100
+        categories:
+          - "Еда"
+          - "Одежда"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 10% на все товары"
+        accumulate_product_id: "6d59c8d4-a61f-4ed9-b7c2-71082dbc4fc7"
+        accumulate_n: 4
+        accumulate_discount_product_id: "55a067ae-f5f5-463f-84cd-10cf2495d8fd"
+        accumulate_discount_percent: 0.15
+      save:
+        json:
+          company_2_loyalty_1_id: loyal_id
+
+  - name: 9 - Запрос на создание программы лояльности №2 компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_2_jwt}"
+      json:
+        name: "Скидка 20%"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 20%"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        categories:
+          - "Техника"
+          - "Животные"
+          - "Игрушки"
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 20% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.2
+      save:
+        json:
+          company_2_loyalty_2_id: loyal_id
+
+  - name: 10 - Запрос на создание программы лояльности №3 компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/create/loyalty"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_2_jwt}"
+      json:
+        name: "Скидка 99% ограниченное время"
+        banner: "{image_3}"
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+    response:
+      status_code: 201
+      json:
+        loyal_id: !anything
+        company_id: !anything
+        name: "Скидка 99% ограниченное время"
+        banner: !anything
+        type: "permanent"
+        unique_activations: 100
+        total_activations: 500
+        start_date: 1772396674
+        end_date: 17723106674
+        description: "Скидка 99% на все товары"
+        permanent_product_id: "6e7afe7a-75c5-464e-aa75-d21d4d1f861f"
+        permanent_discount_percent: 0.99
+      save:
+        json:
+          company_2_loyalty_3_id: loyal_id
+
+  - name: 6 - Запрос на получение всех программ лояльности
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+        - !anything
+        - !anything
+        - !anything
+        - !anything
+        - !anything
+
+  - name: 7 - Запрос на получение всех программ лояльности с фильтром по компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        company_id: "{company_1_id}"
+    response:
+      status_code: 200
+      strict:
+        - json:off
+      json:
+        - !anything
+        - !anything
+        - !anything
+
+  - name: 8 - Запрос на получение всех программ лояльности с фильтром по компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        company_id: "{company_2_id}"
+    response:
+      status_code: 200
+      strict:
+        - json:off
+      json:
+        - !anything
+        - !anything
+        - !anything
+
+  - name: 9 - Запрос на получение всех программ лояльности с фильтром по категориям №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        categories: "Техника"
+    response:
+      status_code: 200
+      strict:
+        - json:off
+      json:
+        - !anything
+        - !anything
+
+  - name: 10 - Запрос на получение всех программ лояльности с фильтром по категориям №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        categories: "Техника,Одежда"
+    response:
+      status_code: 200
+      json:
+        - !anything
+        - !anything
+        - !anything
+        - !anything
+
+  - name: 11 - Запрос на получение всех программ лояльности с фильтром по категориям №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        categories: "Подержанные-автомобили"
+    response:
+      status_code: 200
+      strict: False
+      json: !anylist
+
+  - name: 12 - Запрос на получение всех программ лояльности с фильтром по категориям и компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        categories: "Техника"
+        company_id: "{company_1_id}"
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+
+  - name: 13 - Запрос на получение всех программ лояльности с фильтром по категориям и компании №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        categories: "Техника"
+        company_id: "{company_1_id}"
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+
+  - name: 14 - Запрос на получение всех программ лояльности с пагинацией №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        offset: 5
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+
+  - name: 15 - Запрос на получение всех программ лояльности с пагинацией №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        offset: 2
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+        - !anything
+        - !anything
+        - !anything
+
+  - name: 16 - Запрос на получение всех программ лояльности с пагинацией №3
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        limit: 2
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+        - !anything
+
+  - name: 17 - Запрос на получение всех программ лояльности с пагинацией №4
+    request:
+      url: "{tavern.env_vars.BASE_URL}/loyal/loyalties"
+      method: GET
+      params:
+        limit: 2
+        offset: 2
+    response:
+      status_code: 200
+      strict: False
+      json:
+        - !anything
+        - !anything

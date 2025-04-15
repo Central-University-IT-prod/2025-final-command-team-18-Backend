@@ -1,0 +1,265 @@
+test_name: "Регистрация покупок (после оплаты на POS-терминале)"
+
+includes:
+  - !include encoded_images.yaml
+
+
+stages:
+  - name: 1 - Запрос на регистрацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/register"
+      method: POST
+      json:
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        vertical_banner: "{image_1}"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        company_id: !anything
+        name: "Rubbers and Co."
+        phone: "+79991234567"
+        email: "rubbers@company.com"
+        image_url: !anything  # TODO: Replace by link to image soon
+
+  - name: 2 - Запрос на авторизацию компании №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/company/login"
+      method: POST
+      json:
+        email: "rubbers@company.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        company_id: !anything
+        jwt: !anything
+      save:
+        json:
+          company_1_jwt: jwt
+          company_1_uuid: company_id
+
+  - name: 3 - Запрос на регистрацию клиента №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/register"
+      method: POST
+      json:
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 201
+      json:
+        client_id: !anything
+        name: "Иван"
+        surname: "Иванов"
+        phone: "+79991234567"
+        email: "ivan@example.com"
+
+  - name: 4 - Запрос на авторизацию клиента №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/clients/login"
+      method: POST
+      json:
+        email: "ivan@example.com"
+        password: "Strong!P@ss987"
+    response:
+      status_code: 200
+      json:
+        client_id: !anything
+        jwt: !anything
+      save:
+        json:
+          client_1_jwt: jwt
+
+  - name: 5 - Запрос на регистрацию покупок №1
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/{client_1_jwt}"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 201
+      json:
+        message: "added"
+
+  - name: 6 - Запрос на регистрацию покупок №2
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/{client_1_jwt}"
+        goods:
+          - id: "09273741-f3c7-4e81-b530-839dcb89c5d9"
+            cost: 100
+          - id: "af81069b-f854-4014-9f73-b9f74cb231b5"
+            cost: 157
+          - id: "bf12e09c-654f-4b78-a3de-22c62e74b881"
+            cost: 389
+          - id: "de1f0977-529f-40fe-bb4e-3e7b236016e9"
+            cost: 456789
+          - id: "3c141eb3-f274-4503-9d7d-1807d0891a1a"
+            cost: 1
+          - id: "514b8d07-1e75-403f-bb1f-176e0abc0a90"
+            cost: 4778
+          - id: "38a74691-5ad8-4157-8934-194cfd0dadea"
+            cost: 100
+          - id: "88ac46df-b504-4fa7-83fe-61879da5b7a7"
+            cost: 157
+          - id: "ba8e2cbf-803b-46e6-b4c5-0d2f99f5128f"
+            cost: 389
+          - id: "dbc90ba5-39ee-49fb-8787-38ee5936f5bd"
+            cost: 456789
+          - id: "60276acf-92e1-4561-b717-e333061af0aa"
+            cost: 1
+          - id: "50d51f5f-ddb0-48fb-af9c-041d4db82962"
+            cost: 4778
+          - id: "c9f8e039-62e9-4e2a-a65d-6f73c388d0e5"
+            cost: 100
+          - id: "b0843765-f001-4f9a-b1ee-c4f09469cd3f"
+            cost: 157
+          - id: "df1c80d1-6bea-4ab7-893c-14abe372a046"
+            cost: 389
+          - id: "3435fe62-da30-41e0-bab0-271f00fc6cb9"
+            cost: 456789
+    response:
+      status_code: 201
+      json:
+        message: "added"
+
+  - name: 7 - Запрос на регистрацию покупок с несущ. id компании
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/ad3843cf-e2d5-4255-ace7-15a7e5d500cf/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/{client_1_jwt}"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 404
+
+  - name: 8 - Запрос на регистрацию покупок с несущ. токеном
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+      json:
+        qr_data: "individual/{client_1_jwt}"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 422
+
+  - name: 9 - Запрос на регистрацию покупок с несущ. id клиента в QR-коде
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+            cost: 100
+          - id: "55754d1d-dc18-40d5-b804-a9ca2fde3189"
+            cost: 157
+          - id: "baf42c82-366e-4208-b8d6-56a3f15dd4e9"
+            cost: 389
+    response:
+      status_code: 422
+
+  - name: 10 - Запрос на регистрацию покупок с недостающими полями
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+        goods:
+          - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+    response:
+      status_code: 400
+
+  - name: 11 - Запрос на регистрацию покупок с недостающими полями
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "individual/ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+        goods:
+            - cost: 324
+    response:
+      status_code: 400
+
+  - name: 12 - Запрос на регистрацию покупок с недостающими полями
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        goods:
+            - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+              cost: 324
+    response:
+      status_code: 400
+
+  - name: 13 - Запрос на регистрацию покупок с неправильным форматом qr
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+        goods:
+            - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+              cost: 324
+    response:
+      status_code: 400
+
+  - name: 14 - Запрос на регистрацию покупок с неправильным форматом qr
+    request:
+      url: "{tavern.env_vars.BASE_URL}/qr/{company_1_uuid}/register_purchase"
+      method: POST
+      headers:
+        Authorization: "Bearer {company_1_jwt}"
+      json:
+        qr_data: "datadata/ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+        goods:
+            - id: "ad3843cf-e2d5-4255-ace7-15a7e5d500cf"
+              cost: 324
+    response:
+      status_code: 400
+

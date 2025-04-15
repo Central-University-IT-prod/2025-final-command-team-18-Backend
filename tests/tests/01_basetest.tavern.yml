@@ -1,0 +1,16 @@
+test_name: App health check
+
+stages:
+  - name: 1 - Пингуем приложение
+    request:
+      url: "{tavern.env_vars.BASE_URL}/ping"
+      method: GET
+    response:
+      status_code: 200
+
+  - name: 2 - Сбрасываем базу данных
+    request:
+      url: "{tavern.env_vars.BASE_URL}/test/drop-db"
+      method: POST
+    response:
+      status_code: 200
